@@ -6,6 +6,20 @@
 	<packaging>war</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>subhub Maven Webapp</name>
+	<repositories>
+		<repository>
+			<id>dictat.org snapshots</id>
+			<snapshots><enabled>true</enabled></snapshots>
+			<releases><enabled>false</enabled></releases>
+			<url>http://dictat.org/maven/snapshots</url>
+		</repository>
+		<repository>
+			<id>dictat.org releases</id>
+			<snapshots><enabled>false</enabled></snapshots>
+			<releases><enabled>true</enabled></releases>
+			<url>http://dictat.org/maven/releases</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
