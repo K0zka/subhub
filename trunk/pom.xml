@@ -32,7 +32,7 @@
 		<repository>
 			<id>dictat.org</id>
 			<name>dictat.org maven repository - releases</name>
-			<url>ssh://dictat.org:/var/www/html/maven/releases</url>
+			<url>scp://dictat.org:/var/www/html/maven/releases</url>
 		</repository>
 		<snapshotRepository>
 			<id>dictat.org</id>
