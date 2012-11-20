@@ -47,6 +47,9 @@
 		</site>
 	</distributionManagement>
 
+	<scm>
+		<developerConnection>scm:svn:https://subhub.googlecode.com/svn/trunk/</developerConnection>
+	</scm>
 
 	<dependencies>
 		<dependency>
