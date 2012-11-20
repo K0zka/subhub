@@ -3,7 +3,7 @@
 	<groupId>org.dictat</groupId>
 	<artifactId>subhub</artifactId>
 	<packaging>war</packaging>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<name>subhub</name>
 	<repositories>
 		<repository>
@@ -47,7 +47,7 @@
 	</distributionManagement>
 
 	<scm>
-		<developerConnection>scm:svn:https://subhub.googlecode.com/svn/trunk/</developerConnection>
+		<developerConnection>scm:svn:https://subhub.googlecode.com/svn/tags/subhub-0.0.2</developerConnection>
 	</scm>
 
 	<dependencies>
