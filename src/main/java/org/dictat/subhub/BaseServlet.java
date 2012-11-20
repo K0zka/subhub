@@ -12,22 +12,22 @@ public abstract class BaseServlet extends HttpServlet {
 	private static final long serialVersionUID = 7250937984773922291L;
 
 	protected SubscriptionRepository getSubscriptionRepository() {
-		return (SubscriptionRepository) getContect().getBean(
+		return (SubscriptionRepository) getContext().getBean(
 						"repo");
 	}
 
-	final WebApplicationContext getContect() {
+	final WebApplicationContext getContext() {
 		return WebApplicationContextUtils
 				.getRequiredWebApplicationContext(getServletContext());
 	}
 
 	protected SubHub getSubHub() {
-		return (SubHub) getContect().getBean(
+		return (SubHub) getContext().getBean(
 						"subhub");
 	}
 
 	protected EventQueue getEventQueue() {
-		return (EventQueue) getContect().getBean(
+		return (EventQueue) getContext().getBean(
 						"eventQueue");
 	}
 
