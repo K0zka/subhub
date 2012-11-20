@@ -7,6 +7,9 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+import org.dictat.rsscut.RssCut;
+import org.dictat.scala4j.IterableAdapter;
 import org.dictat.subhub.beans.services.SubHub;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +45,10 @@ public class PubSubServlet extends BaseServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		getEventQueue().onPublish(req.getInputStream());
+		final String post = IOUtils.toString(req.getInputStream(), req.getCharacterEncoding());
+		for(final String news : new IterableAdapter<String>(RssCut.cut(post))) {
+			getEventQueue().onPublish(IOUtils.toInputStream(news));
+		}
 	}
 
 }
