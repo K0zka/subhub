@@ -131,6 +131,16 @@
 			<artifactId>jsoup</artifactId>
 			<version>1.6.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.dictat</groupId>
+			<artifactId>rsscut</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.dictat</groupId>
+			<artifactId>scala4j</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<extensions>
