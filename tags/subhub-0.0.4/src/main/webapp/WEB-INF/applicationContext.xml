@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:amq="http://activemq.apache.org/schema/core"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+	<bean id="repo"
+		class="org.dictat.subhub.beans.services.mongo.MongoSubscriptionRepository"
+		init-method="init">
+		<constructor-arg ref="mongo" />
+	</bean>
+
+	<bean id="mongoIp" class="org.dictat.subhub.utils.StringFactory">
+		<property name="value" value="192.168.122.235" />
+	</bean>
+
+	<bean id="mongo" class="com.mongodb.Mongo">
+		<constructor-arg>
+			<bean factory-bean="mongoIp" factory-method="getValue" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="subhub" class="org.dictat.subhub.beans.services.SubHub">
+		<constructor-arg ref="repo" />
+		<constructor-arg ref="eventQueue" />
+	</bean>
+
+	<amq:broker useJmx="false" persistent="true" brokerName="subhub-borker">
+		<amq:transportConnectors>
+			<amq:transportConnector uri="vm://subhub-borker" />
+			<amq:transportConnector uri="tcp://localhost:61616" />
+		</amq:transportConnectors>
+	</amq:broker>
+
+	<amq:connectionFactory id="jmsConnectionFactory"
+		brokerURL="vm://subhub-borker" />
+
+	<amq:queue id="jmsQueue" name="eventqueue" physicalName="eventqueue"/>
+	<amq:queue id="commandQueue" name="commandqueue" physicalName="commandqueue"/>
+
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="defaultDestination" ref="jmsQueue" />
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+	</bean>
+
+	<bean id="eventQueue" class="org.dictat.subhub.beans.services.jms.JmsEventQueue">
+		<constructor-arg ref="jmsTemplate" />
+	</bean>
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="location" value="classpath:subhub.properties" />
+	</bean>
+
+	<bean id="jmsContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="destination" ref="commandQueue" />
+		<property name="messageListener" ref="commandListener" />
+	</bean>
+
+	<bean id="commandListener" class="org.dictat.subhub.beans.services.jms.CommandListener">
+		<constructor-arg ref="subhub"/>
+	</bean>
+
+</beans>
