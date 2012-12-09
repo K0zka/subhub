@@ -26,7 +26,7 @@ public class JmsEventQueue implements EventQueue {
 			.getLogger(JmsEventQueue.class);
 
 	public void onPublish(final InputStream input) {
-		logger.info("sending newsitem to queue");
+		logger.debug("sending newsitem to queue");
 		jmsTemplate.send(new MessageCreator() {
 
 			public Message createMessage(Session session) throws JMSException {
@@ -46,7 +46,7 @@ public class JmsEventQueue implements EventQueue {
 				return msg;
 			}
 		});
-		logger.info("done");
+		logger.debug("done");
 	}
 
 }
