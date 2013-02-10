@@ -93,8 +93,16 @@ public class SubHub {
 		logger.info("requested verification for {} with code {}", url,
 				verification);
 		Subscription subscription = repository.getByUrl(url);
-		return subscription != null && verification != null
+		if(subscription == null) {
+			return false;
+		}
+		boolean ret = verification != null
 				&& verification.equals(subscription.getVerifyToken());
+		if(ret) {
+			subscription.setLastResubscribe(new Date());
+			repository.save(subscription);
+		}
+		return ret;
 	}
 
 	private HttpClient getHttpClient() {
