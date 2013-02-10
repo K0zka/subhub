@@ -11,12 +11,33 @@
 	</bean>
 
 	<bean id="mongoIp" class="org.dictat.subhub.utils.StringFactory">
-		<property name="value" value="192.168.122.235" />
+		<property name="value" value="192.168.122.236" />
 	</bean>
 
 	<bean id="mongo" class="com.mongodb.Mongo">
 		<constructor-arg>
 			<bean factory-bean="mongoIp" factory-method="getValue" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="scheduler"
+		class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler">
+	</bean>
+
+	<bean id="jobs.resubscriber" class="org.dictat.subhub.beans.services.jobs.JobWrapper"
+		init-method="init">
+		<constructor-arg ref="scheduler" />
+		<constructor-arg>
+			<bean class="org.dictat.subhub.beans.services.jobs.ResubscribeJob">
+				<constructor-arg ref="repo" />
+				<constructor-arg ref="subhub" />
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
+				<constructor-arg value="1"/>
+				<constructor-arg value="HOURS"/>
+			</bean>
 		</constructor-arg>
 	</bean>
 
@@ -33,10 +54,11 @@
 	</amq:broker>
 
 	<amq:connectionFactory id="jmsConnectionFactory"
-		brokerURL="vm://subhub-borker" />
+		brokerURL="vm://subhub-borker" alwaysSyncSend="false" sendAcksAsync="true" />
 
-	<amq:queue id="jmsQueue" name="eventqueue" physicalName="eventqueue"/>
-	<amq:queue id="commandQueue" name="commandqueue" physicalName="commandqueue"/>
+	<amq:queue id="jmsQueue" name="eventqueue" physicalName="eventqueue" />
+	<amq:queue id="commandQueue" name="commandqueue"
+		physicalName="commandqueue" />
 
 	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
 		<property name="defaultDestination" ref="jmsQueue" />
@@ -61,7 +83,7 @@
 	</bean>
 
 	<bean id="commandListener" class="org.dictat.subhub.beans.services.jms.CommandListener">
-		<constructor-arg ref="subhub"/>
+		<constructor-arg ref="subhub" />
 	</bean>
 
 </beans>
