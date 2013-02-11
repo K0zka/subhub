@@ -17,7 +17,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.dictat.subhub.beans.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.todomap.feed.Reader;
+import org.todomap.feed.HttpClientReader;
 import org.todomap.feed.beans.NewsFeed;
 import org.todomap.feed.utils.NewsFeedUtils;
 
@@ -51,7 +51,7 @@ public class SubHub {
 
 	public void subscribe(String feedUrl) throws IOException {
 		logger.info("requested suscribe to {}", feedUrl);
-		final String pubSubHub = getFeedHub(Reader.read(feedUrl));
+		final String pubSubHub = getFeedHub(HttpClientReader.read(feedUrl));
 
 		logger.info("hub is {}", pubSubHub);
 
