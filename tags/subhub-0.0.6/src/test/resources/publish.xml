@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:blogger="http://schemas.google.com/blogger/2008"
+	xmlns:georss="http://www.georss.org/georss" xmlns:gd="http://schemas.google.com/g/2005"
+	xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/" xmlns:thr="http://purl.org/syndication/thread/1.0">
+	<id>tag:blogger.com,1999:blog-672510761493717658</id>
+	<updated>2012-09-22T13:37:25.577-07:00</updated>
+	<title type="text">debug</title>
+	<subtitle type="html" />
+	<link href="http://pubsubdebug.blogspot.com/feeds/posts/default"
+		type="application/atom+xml" rel="http://schemas.google.com/g/2005#feed" />
+	<link href="http://www.blogger.com/feeds/672510761493717658/posts/default"
+		type="application/atom+xml" rel="self" />
+	<link href="http://pubsubdebug.blogspot.com/" type="text/html"
+		rel="alternate" />
+	<link href="http://pubsubhubbub.appspot.com/" rel="hub" />
+	<author>
+		<name>Kocka</name>
+		<uri>http://www.blogger.com/profile/10505773298750628833</uri>
+		<email>noreply@blogger.com</email>
+		<gd:image width="24"
+			src="http://photos1.blogger.com/x/blogger/3271/703/320/170223/00024.jpg"
+			rel="http://schemas.google.com/g/2005#thumbnail" height="32" />
+	</author>
+	<generator version="7.00" uri="http://www.blogger.com">Blogger</generator>
+	<openSearch:totalResults>10</openSearch:totalResults>
+	<openSearch:startIndex>1</openSearch:startIndex>
+	<openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+	<entry>
+		<id>tag:blogger.com,1999:blog-672510761493717658.post-341905641786444567</id>
+		<published>2012-09-22T13:37:00.001-07:00</published>
+		<updated>2012-09-22T13:37:25.589-07:00</updated>
+		<title type="text">pubsubhub</title>
+		<content type="html">bub&lt;div
+			class="blogger-post-footer"&gt;&lt;img width='1' height='1'
+			src='https://blogger.googleusercontent.com/tracker/672510761493717658-341905641786444567?l=pubsubdebug.blogspot.com'
+			alt='' /&gt;&lt;/div&gt;</content>
+		<link
+			href="http://pubsubdebug.blogspot.com/feeds/341905641786444567/comments/default"
+			type="application/atom+xml" rel="replies" title="Post Comments" />
+		<link
+			href="http://pubsubdebug.blogspot.com/2012/09/pubsubhub.html#comment-form"
+			type="text/html" rel="replies" title="0 Comments" />
+		<link
+			href="http://www.blogger.com/feeds/672510761493717658/posts/default/341905641786444567"
+			type="application/atom+xml" rel="edit" />
+		<link
+			href="http://www.blogger.com/feeds/672510761493717658/posts/default/341905641786444567"
+			type="application/atom+xml" rel="self" />
+		<link href="http://pubsubdebug.blogspot.com/2012/09/pubsubhub.html"
+			type="text/html" rel="alternate" title="pubsubhub" />
+		<author>
+			<name>Kocka</name>
+			<uri>http://www.blogger.com/profile/10505773298750628833</uri>
+			<email>noreply@blogger.com</email>
+			<gd:image width="24"
+				src="http://photos1.blogger.com/x/blogger/3271/703/320/170223/00024.jpg"
+				rel="http://schemas.google.com/g/2005#thumbnail" height="32" />
+		</author>
+		<thr:total>0</thr:total>
+	</entry>
+</feed>
