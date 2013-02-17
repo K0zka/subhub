@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.dictat.subhub.beans.Subscription;
+import org.dictat.subhub.beans.SubscriptionStatus;
 import org.dictat.subhub.beans.services.SubHub;
 import org.dictat.subhub.beans.services.SubscriptionRepository;
 import org.slf4j.Logger;
@@ -33,9 +34,19 @@ public class ResubscribeJob implements Runnable {
 			logger.info("Refreshing subscription:" + sub.getUrl());
 			try {
 				subHub.subscribe(sub.getUrl());
+				checkSubscription(sub, SubscriptionStatus.Subscribed);
 			} catch (IOException e) {
-				logger.debug("Failed to resubscribe " + sub.getUrl(), e);
+				checkSubscription(sub, SubscriptionStatus.Failing);
+				logger.warn("Failed to resubscribe " + sub.getUrl(), e);
 			}
+		}
+	}
+
+	private void checkSubscription(Subscription sub, SubscriptionStatus status) {
+		if(sub.getStatus() != status) {
+			sub.setStatus(status);
+			sub.setStatusChange(new Date());
+			repository.save(sub);
 		}
 	}
 

@@ -10,6 +10,8 @@ public class Subscription {
 	String verifyToken;
 	String hub;
 	Integer lease;
+	SubscriptionStatus status;
+	Date statusChange;
 
 	public String getVerifyToken() {
 		return verifyToken;
@@ -70,5 +72,21 @@ public class Subscription {
 	@Override
 	public String toString() {
 		return "[sub " + url + " through " + hub + "]";
+	}
+
+	public SubscriptionStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(SubscriptionStatus status) {
+		this.status = status;
+	}
+
+	public Date getStatusChange() {
+		return statusChange;
+	}
+
+	public void setStatusChange(Date statusChange) {
+		this.statusChange = statusChange;
 	}
 }
