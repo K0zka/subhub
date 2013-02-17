@@ -7,6 +7,7 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.dictat.subhub.beans.Subscription;
 import org.dictat.subhub.beans.services.SubscriptionRepository;
+import org.dictat.subhub.utils.StatusUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,8 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 		subscription.setLastResubscribe((Date) res.get("lr"));
 		subscription.setSubscribed((Date) res.get("s"));
 		subscription.setVerifyToken(stringOrNull(res, "v"));
+		subscription.setStatus( StatusUtils.toStatus( stringOrNull(res, "st")));
+		subscription.setStatusChange((Date) res.get("stc"));
 		return subscription;
 	}
 
@@ -85,7 +88,9 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 				.append("s", subscription.getSubscribed())
 				.append("lr", subscription.getLastResubscribe())
 				.append("l", subscription.getLease())
-				.append("u", subscription.getUrl());
+				.append("u", subscription.getUrl())
+				.append("st", StatusUtils.toLetter(subscription.getStatus()))
+				.append("stc", subscription.getStatusChange());
 		if (subscription.getId() != null) {
 			obj.append("_id", new ObjectId(subscription.getId()));
 		}
