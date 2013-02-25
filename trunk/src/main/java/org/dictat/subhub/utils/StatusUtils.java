@@ -15,6 +15,7 @@ public class StatusUtils {
 					put("i", SubscriptionStatus.Initiating);
 					put("s", SubscriptionStatus.Subscribed);
 					put("f", SubscriptionStatus.Failing);
+					put("p", SubscriptionStatus.PendingUnsubscription);
 					put("u", SubscriptionStatus.Unsubscribed);
 				}
 			});

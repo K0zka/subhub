@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.dictat.subhub.beans.PollSubscription;
+import org.dictat.subhub.beans.PushSubscription;
 import org.dictat.subhub.beans.Subscription;
 import org.dictat.subhub.beans.services.SubscriptionRepository;
 import org.dictat.subhub.utils.StatusUtils;
@@ -20,30 +22,134 @@ import com.mongodb.Mongo;
 
 public class MongoSubscriptionRepository implements SubscriptionRepository {
 
+	private final static Logger logger = LoggerFactory
+			.getLogger(MongoSubscriptionRepository.class);
+
+	static Subscription dbObjToSubscription(final DBObject res) {
+		Subscription subscription;
+		if (stringOrNull(res, "h") == null) {
+			// no hub, this is a poll subscription
+			subscription = new PollSubscription();
+			((PollSubscription) subscription).setEtag(stringOrNull(res, "e"));
+			((PollSubscription) subscription).setLastupdate(stringOrNull(res,
+					"lu"));
+			((PollSubscription) subscription).setNextPoll((Date) res.get("np"));
+			((PollSubscription) subscription).setInterval((Long) res.get("iv"));
+			((PollSubscription) subscription).setLastGuid(stringOrNull(res,
+					"lg"));
+		} else {
+			subscription = new PushSubscription();
+			((PushSubscription) subscription).setHub(stringOrNull(res, "h"));
+			((PushSubscription) subscription)
+					.setLease((Integer) (res.get("l")));
+			((PushSubscription) subscription).setLastResubscribe((Date) res
+					.get("lr"));
+			((PushSubscription) subscription).setVerifyToken(stringOrNull(res,
+					"v"));
+		}
+		subscription.setId(stringOrNull(res, "_id"));
+		subscription.setUrl(stringOrNull(res, "u"));
+		subscription.setSubscribed((Date) res.get("s"));
+		subscription.setStatus(StatusUtils.toStatus(stringOrNull(res, "st")));
+		subscription.setStatusChange((Date) res.get("stc"));
+		return subscription;
+	}
+
+	static String stringOrNull(final DBObject res, final String key) {
+		return res.get(key) == null ? null : res.get(key).toString();
+	}
+
+	static BasicDBObject subscriptionToDbObj(final Subscription subscription) {
+		final BasicDBObject obj = new BasicDBObject();
+		if (subscription.getId() != null) {
+			obj.append("_id", new ObjectId(subscription.getId()));
+		}
+		if (subscription instanceof PushSubscription) {
+			obj.append("h", ((PushSubscription) subscription).getHub())
+					.append("v",
+							((PushSubscription) subscription).getVerifyToken())
+					.append("s",
+							((PushSubscription) subscription).getSubscribed())
+					.append("lr",
+							((PushSubscription) subscription)
+									.getLastResubscribe())
+					.append("l", ((PushSubscription) subscription).getLease());
+		} else if (subscription instanceof PollSubscription) {
+			obj.append("i", ((PollSubscription) subscription).getInterval())
+					.append("e", ((PollSubscription) subscription).getEtag())
+					.append("lu",
+							((PollSubscription) subscription).getLastupdate())
+					.append("np",
+							((PollSubscription) subscription).getNextPoll())
+					.append("iv",
+							((PollSubscription) subscription).getInterval());
+		}
+		obj.append("u", subscription.getUrl())
+				.append("st", StatusUtils.toLetter(subscription.getStatus()))
+				.append("stc", subscription.getStatusChange());
+		return obj;
+	}
+
+	private String collection = "subs";
+
+	private String dbname = "subhub";
+
+	final Mongo mongo;
+
 	public MongoSubscriptionRepository(final Mongo mongo) {
 		this.mongo = mongo;
 	}
 
-	final Mongo mongo;
-	private String dbname = "subhub";
-	private String collection = "subs";
-	private final static Logger logger = LoggerFactory
-			.getLogger(MongoSubscriptionRepository.class);
-
-	public void init() {
-		BasicDBObject keys = new BasicDBObject();
-		keys.append("url", 1);
-		getColl().createIndex(keys);
+	private void addSubs(final List<PushSubscription> subscriptions,
+			final BasicDBObject query) {
+		try (DBCursor cursor = getColl().find(query)) {
+			while (cursor.hasNext()) {
+				subscriptions.add((PushSubscription) dbObjToSubscription(cursor
+						.next()));
+			}
+		}
 	}
 
-	private DBCollection getColl() {
-		return getDataBase().getCollection(collection);
+	@Override
+	public List<PushSubscription> findExpring(final Date time) {
+		final ArrayList<PushSubscription> subscriptions = new ArrayList<PushSubscription>();
+		final BasicDBObject query = new BasicDBObject();
+		final BasicDBObject condition = new BasicDBObject();
+		condition.append("$lt", time);
+		query.append("lr", condition);
+		query.append("h", new BasicDBObject("$ne", null));
+		// filter failing
+		query.append("st", new BasicDBObject("$ne", "f"));
+		addSubs(subscriptions, query);
+
+		BasicDBObject noLastResub = new BasicDBObject("lr", null).append("h",
+				new BasicDBObject("$ne", null)).append("st",
+				new BasicDBObject("$ne", "f"));
+
+		addSubs(subscriptions, noLastResub);
+
+		return subscriptions;
 	}
 
-	public Subscription getByUrl(String url) {
+	@Override
+	public List<PollSubscription> findPolling(final Date time) {
+		BasicDBObject query = new BasicDBObject();
+		query.append("h", null);
+		query.append("np", new BasicDBObject("$lt", new Date()));
+		ArrayList<PollSubscription> result = new ArrayList<>();
+		DBCursor cursor = getColl().find(query);
+		while(cursor.hasNext()) {
+			result.add((PollSubscription) dbObjToSubscription(cursor.next()));
+		}
+
+		return result;
+	}
+
+	@Override
+	public Subscription getByUrl(final String url) {
 		final BasicDBObject query = new BasicDBObject();
 		query.append("u", url);
-		DBObject res = getColl().findOne(query);
+		final DBObject res = getColl().findOne(query);
 		if (res == null) {
 			return null;
 		}
@@ -51,22 +157,12 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 		return subscription;
 	}
 
-	private Subscription dbObjToSubscription(DBObject res) {
-		final Subscription subscription = new Subscription();
-		subscription.setId(stringOrNull(res, "_id"));
-		subscription.setHub(stringOrNull(res, "h"));
-		subscription.setUrl(stringOrNull(res, "u"));
-		subscription.setLease((Integer) (res.get("l")));
-		subscription.setLastResubscribe((Date) res.get("lr"));
-		subscription.setSubscribed((Date) res.get("s"));
-		subscription.setVerifyToken(stringOrNull(res, "v"));
-		subscription.setStatus( StatusUtils.toStatus( stringOrNull(res, "st")));
-		subscription.setStatusChange((Date) res.get("stc"));
-		return subscription;
+	private DBCollection getColl() {
+		return getDataBase().getCollection(collection);
 	}
 
-	private String stringOrNull(DBObject res, String key) {
-		return res.get(key) == null ? null : res.get(key).toString();
+	public String getCollection() {
+		return collection;
 	}
 
 	private DB getDataBase() {
@@ -77,56 +173,25 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 		return dbname;
 	}
 
-	public void setDbname(String dbname) {
-		this.dbname = dbname;
+	public void init() {
+		final BasicDBObject keys = new BasicDBObject();
+		keys.append("url", 1);
+		getColl().createIndex(keys);
 	}
 
-	public void save(Subscription subscription) {
-		BasicDBObject obj = new BasicDBObject();
-		obj.append("h", subscription.getHub())
-				.append("v", subscription.getVerifyToken())
-				.append("s", subscription.getSubscribed())
-				.append("lr", subscription.getLastResubscribe())
-				.append("l", subscription.getLease())
-				.append("u", subscription.getUrl())
-				.append("st", StatusUtils.toLetter(subscription.getStatus()))
-				.append("stc", subscription.getStatusChange());
-		if (subscription.getId() != null) {
-			obj.append("_id", new ObjectId(subscription.getId()));
-		}
+	@Override
+	public void save(final Subscription subscription) {
+		final BasicDBObject obj = subscriptionToDbObj(subscription);
 		logger.debug("subscription saved to repo: {}", subscription.getUrl());
 		getColl().save(obj);
 	}
 
-	public String getCollection() {
-		return collection;
-	}
-
-	public void setCollection(String collection) {
+	public void setCollection(final String collection) {
 		this.collection = collection;
 	}
 
-	public List<Subscription> findExpring(Date time) {
-		ArrayList<Subscription> subscriptions = new ArrayList<Subscription>();
-		BasicDBObject query = new BasicDBObject();
-		BasicDBObject condition = new BasicDBObject();
-		condition.append("$lt", time);
-		query.append("lr", condition);
-		addSubs(subscriptions, query);
-
-		BasicDBObject nullQuery = new BasicDBObject();
-		nullQuery.append("lr", null);
-		addSubs(subscriptions, nullQuery);
-
-		return subscriptions;
-	}
-
-	private void addSubs(List<Subscription> subscriptions, BasicDBObject query) {
-		try (DBCursor cursor = getColl().find(query)) {
-			while (cursor.hasNext()) {
-				subscriptions.add(dbObjToSubscription(cursor.next()));
-			}
-		}
+	public void setDbname(final String dbname) {
+		this.dbname = dbname;
 	}
 
 }

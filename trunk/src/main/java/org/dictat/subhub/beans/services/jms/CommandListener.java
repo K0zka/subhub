@@ -9,7 +9,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
-import org.dictat.subhub.beans.services.SubHub;
+import org.dictat.subhub.beans.services.HubHub;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,12 +21,12 @@ public class CommandListener implements MessageListener {
 	private final static Logger logger = LoggerFactory
 			.getLogger(CommandListener.class);
 
-	public CommandListener(SubHub subHub) {
+	public CommandListener(HubHub hub) {
 		super();
-		this.subHub = subHub;
+		this.hub = hub;
 	}
 
-	final SubHub subHub;
+	final HubHub hub;
 
 	public void onMessage(final Message message) {
 		if (!(message instanceof TextMessage)) {
@@ -37,12 +37,12 @@ public class CommandListener implements MessageListener {
 		try {
 			String msg = ((TextMessage) message).getText();
 			if (msg.startsWith("+")) {
-				subHub.subscribe(msg.substring(1));
+				hub.subscribe(msg.substring(1));
 			} else if (msg.startsWith("-")) {
-				subHub.unsubscribe(msg.substring(1));
+				hub.unsubscribe(msg.substring(1));
 			} else if (msg.startsWith("!")) {
 				for (String url : discover(msg.substring(1))) {
-					subHub.subscribe(url);
+					hub.subscribe(url);
 				}
 			}
 		} catch (JMSException e) {

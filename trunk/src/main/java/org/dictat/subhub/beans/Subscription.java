@@ -2,24 +2,34 @@ package org.dictat.subhub.beans;
 
 import java.util.Date;
 
-public class Subscription {
-	String id;
-	String url;
-	Date subscribed;
-	Date lastResubscribe;
-	String verifyToken;
-	String hub;
-	Integer lease;
-	SubscriptionStatus status;
-	Date statusChange;
-
-	public String getVerifyToken() {
-		return verifyToken;
+/**
+ * Abstract subscription class. Only serves as a baseclass for
+ * {@link PushSubscription} and {@link PollSubscription}, common attributes
+ * here.
+ */
+public abstract class Subscription {
+	public Subscription() {
+		super();
 	}
 
-	public void setVerifyToken(String verifyToken) {
-		this.verifyToken = verifyToken;
+	/**
+	 * Creates a subscription as a copy of an existing subscription.
+	 * @param sub subscription to copy from.
+	 */
+	public Subscription(Subscription sub) {
+		super();
+		this.id = sub.getId();
+		this.status = sub.getStatus();
+		this.statusChange = sub.getStatusChange();
+		this.subscribed = sub.getSubscribed();
+		this.url = sub.getUrl();
 	}
+
+	private String id;
+	private String url;
+	private Date subscribed;
+	private SubscriptionStatus status;
+	private Date statusChange;
 
 	public String getUrl() {
 		return url;
@@ -37,41 +47,12 @@ public class Subscription {
 		this.subscribed = subscribed;
 	}
 
-	public Date getLastResubscribe() {
-		return lastResubscribe;
-	}
-
-	public void setLastResubscribe(Date lastResubscribe) {
-		this.lastResubscribe = lastResubscribe;
-	}
-
-	public String getHub() {
-		return hub;
-	}
-
-	public void setHub(String hub) {
-		this.hub = hub;
-	}
-
-	public Integer getLease() {
-		return lease;
-	}
-
-	public void setLease(Integer lease) {
-		this.lease = lease;
-	}
-
 	public String getId() {
 		return id;
 	}
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	@Override
-	public String toString() {
-		return "[sub " + url + " through " + hub + "]";
 	}
 
 	public SubscriptionStatus getStatus() {
