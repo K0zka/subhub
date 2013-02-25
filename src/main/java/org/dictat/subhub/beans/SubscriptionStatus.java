@@ -4,5 +4,6 @@ public enum SubscriptionStatus {
 	Initiating,
 	Subscribed,
 	Failing,
+	PendingUnsubscription,
 	Unsubscribed
 }

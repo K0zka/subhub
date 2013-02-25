@@ -1,4 +1,4 @@
-package org.dictat.subhub.beans.services.jobs;
+package org.dictat.subhub.utils;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -21,7 +21,19 @@ public class JobWrapper {
 	final Runnable task;
 	final Trigger trigger;
 
+	boolean enabled = true;
+
 	public void init() {
-		scheduler.schedule(task, trigger);
+		if(enabled) {
+			scheduler.schedule(task, trigger);
+		}
+	}
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	};
 }
