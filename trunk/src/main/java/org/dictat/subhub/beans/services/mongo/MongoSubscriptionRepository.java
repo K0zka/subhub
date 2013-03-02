@@ -82,7 +82,9 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 					.append("np",
 							((PollSubscription) subscription).getNextPoll())
 					.append("iv",
-							((PollSubscription) subscription).getInterval());
+							((PollSubscription) subscription).getInterval())
+					.append("lg",
+							((PollSubscription) subscription).getLastGuid());
 		}
 		obj.append("u", subscription.getUrl())
 				.append("st", StatusUtils.toLetter(subscription.getStatus()))
@@ -135,10 +137,11 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 	public List<PollSubscription> findPolling(final Date time) {
 		BasicDBObject query = new BasicDBObject();
 		query.append("h", null);
+		query.append("st", "s");
 		query.append("np", new BasicDBObject("$lt", new Date()));
 		ArrayList<PollSubscription> result = new ArrayList<>();
 		DBCursor cursor = getColl().find(query);
-		while(cursor.hasNext()) {
+		while (cursor.hasNext()) {
 			result.add((PollSubscription) dbObjToSubscription(cursor.next()));
 		}
 
