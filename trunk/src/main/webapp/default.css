@@ -1,0 +1,31 @@
+body {
+	background: #f0f0f0;
+	font-family: sans-serif;
+}
+
+#container {
+	position: relative;
+	top: 20px;
+	text-align: center;
+	width: 402px;
+}
+
+#container:before {
+	content: url("Globe_valve_diagram.svg");
+	z-index: -1;
+	position: absolute;
+	left: 0;
+	top: 0;
+	opacity: 0.2;
+}
+
+h2 {
+	top: 10px;
+}
+
+.version {
+	text-transform: lowercase;
+	font-weight: bold;
+	position: relative;
+	top: 120px;
+}
