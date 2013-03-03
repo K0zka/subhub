@@ -64,8 +64,8 @@ public class SubHub implements Hub<PushSubscription> {
 		sub.setStatusChange(new Date());
 		final String verificationCode = UUID.randomUUID().toString();
 		logger.info(
-				"new subscribe request to {} for {} verification code is {}",
-				new Object[] { sub.getHub(), feedUrl, verificationCode });
+				"{} - new subscribe request to {} verification code is {}",
+				new Object[] { feedUrl, sub.getHub(), verificationCode });
 		sub.setVerifyToken(verificationCode);
 		return sub;
 	}
@@ -84,10 +84,11 @@ public class SubHub implements Hub<PushSubscription> {
 						.getVerifyToken()))));
 		HttpResponse response = client.execute(post);
 		logger.info(
-				"response: {} {}",
+				"{} - response: {} {}",
+				new Object[] {sub.getUrl(),
 				response.getStatusLine().getStatusCode(),
 				response.getEntity() == null ? "" : IOUtils.toString(response
-						.getEntity().getContent()));
+						.getEntity().getContent())});
 		if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 			sub.setStatus(SubscriptionStatus.Subscribed);
 		} else {
@@ -114,10 +115,12 @@ public class SubHub implements Hub<PushSubscription> {
 				new BasicNameValuePair(mode, modeUnsubscribe))));
 		final HttpResponse response = getHttpClient().execute(post);
 		logger.info(
-				"response: %s %s",
+				"%s - response: %s %s",
+				new Object[] {
+				subscription.getUrl(),
 				response.getStatusLine().getStatusCode(),
 				response.getEntity() == null ? "" : IOUtils.toString(response
-						.getEntity().getContent()));
+						.getEntity().getContent())});
 		return subscription;
 	}
 
