@@ -11,7 +11,7 @@
 	</bean>
 
 	<bean id="mongoIp" class="org.dictat.subhub.utils.StringFactory">
-		<property name="value" value="192.168.122.246" />
+		<property name="value" value="192.168.122.247" />
 	</bean>
 
 	<bean id="mongo" class="com.mongodb.Mongo">
@@ -30,9 +30,12 @@
 		<constructor-arg value="1"/>
 		<constructor-arg value="SECONDS"/>
 		<constructor-arg>
+			<!-- 
 			<bean class="java.util.concurrent.PriorityBlockingQueue">
 				<constructor-arg value="32"/>
 			</bean>
+			 -->
+			<bean class="java.util.concurrent.LinkedBlockingQueue"></bean>
 		</constructor-arg>
 	</bean>
 
@@ -67,6 +70,22 @@
 		<constructor-arg>
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
 				<constructor-arg value="1"/>
+				<constructor-arg value="MINUTES"/>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="jobs.failing" class="org.dictat.subhub.utils.JobWrapper" init-method="init">
+		<constructor-arg ref="scheduler"/>
+		<constructor-arg>
+			<bean class="org.dictat.subhub.beans.services.RecheckFailing">
+				<constructor-arg ref="repo"/>
+				<constructor-arg ref="executor"/>
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
+				<constructor-arg value="15"/>
 				<constructor-arg value="MINUTES"/>
 			</bean>
 		</constructor-arg>
