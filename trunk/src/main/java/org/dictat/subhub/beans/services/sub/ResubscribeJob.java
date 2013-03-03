@@ -13,6 +13,7 @@ import org.dictat.subhub.beans.PollSubscription;
 import org.dictat.subhub.beans.PushSubscription;
 import org.dictat.subhub.beans.Subscription;
 import org.dictat.subhub.beans.SubscriptionStatus;
+import org.dictat.subhub.beans.services.AbstractJob;
 import org.dictat.subhub.beans.services.Prioritized;
 import org.dictat.subhub.beans.services.SubscriptionRepository;
 import org.slf4j.Logger;
@@ -21,7 +22,7 @@ import org.todomap.feed.HttpClientReader;
 import org.todomap.feed.beans.NewsFeed;
 import org.todomap.feed.utils.NewsFeedUtils;
 
-public class ResubscribeJob implements Runnable {
+public class ResubscribeJob extends AbstractJob {
 
 	class ResubscribeTask implements Runnable, Prioritized, Comparable<Prioritized> {
 		private final PushSubscription sub;
@@ -69,30 +70,31 @@ public class ResubscribeJob implements Runnable {
 
 	public ResubscribeJob(SubscriptionRepository repository, SubHub subHub,
 			ExecutorService executor) {
-		super();
-		this.repository = repository;
+		super(repository, executor);
 		this.subHub = subHub;
-		this.executor = executor;
 	}
 
 	private final static Logger logger = LoggerFactory
 			.getLogger(ResubscribeJob.class);
 
-	final SubscriptionRepository repository;
 	final SubHub subHub;
-	final ExecutorService executor;
 
 	public void run() {
-		GregorianCalendar calendar = new GregorianCalendar();
-		calendar.setTime(new Date());
-		calendar.add(Calendar.MONTH, -2);
 		final List<PushSubscription> expiringSubs = repository
-				.findExpring(calendar.getTime());
+				.findExpring(getExpriginSubscriptionDate());
 		logger.info("Checking {} subscriptions to refresh subscription",
 				expiringSubs.size());
 		for (final PushSubscription sub : expiringSubs) {
 			executor.execute(new ResubscribeTask(sub));
 		}
+	}
+
+	static Date getExpriginSubscriptionDate() {
+		GregorianCalendar calendar = new GregorianCalendar();
+		calendar.setTime(new Date());
+		calendar.add(Calendar.MONTH, -2);
+		Date time = calendar.getTime();
+		return time;
 	}
 
 	private void checkSubscription(Subscription sub, SubscriptionStatus status) {
