@@ -17,7 +17,8 @@ import org.todomap.feed.beans.transport.TransportCacheControl;
  */
 public class PollHub implements Hub<PollSubscription> {
 
-	private long defaultPollFrequencyMs = 1000 * 60 * 60 * 24;
+	public static final long defaultPollFrequencyMsHardDefault = 1000 * 60 * 60 * 24;
+	private long defaultPollFrequencyMs = defaultPollFrequencyMsHardDefault;
 
 	public long getDefaultPollFrequencyMs() {
 		return defaultPollFrequencyMs;
