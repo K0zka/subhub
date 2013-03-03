@@ -116,9 +116,7 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 	public List<PushSubscription> findExpring(final Date time) {
 		final ArrayList<PushSubscription> subscriptions = new ArrayList<PushSubscription>();
 		final BasicDBObject query = new BasicDBObject();
-		final BasicDBObject condition = new BasicDBObject();
-		condition.append("$lt", time);
-		query.append("lr", condition);
+		query.append("lr", new BasicDBObject("$lt", time));
 		query.append("h", new BasicDBObject("$ne", null));
 		// filter failing
 		query.append("st", new BasicDBObject("$ne", "f"));
@@ -177,9 +175,10 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 	}
 
 	public void init() {
-		final BasicDBObject keys = new BasicDBObject();
-		keys.append("url", 1);
-		getColl().createIndex(keys);
+		getColl().createIndex(new BasicDBObject("u", 1));
+		BasicDBObject index = new BasicDBObject("h", 1);
+		index.append("lr", 1).append("st", 1);
+		getColl().createIndex(index);
 	}
 
 	@Override
