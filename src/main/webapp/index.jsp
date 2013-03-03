@@ -1,10 +1,14 @@
+<%@page import="org.dictat.subhub.utils.VersionUtil"%>
+<%@page isThreadSafe="true" %>
 <html>
 <head>
 <title>SubHub</title>
+<link rel="stylesheet" href="default.css">
 </head>
 <body>
-	<h2>SubHub!</h2>
-	<p>This is a SubHub service. Sorry, nothing to see here for
-		mere humans.</p>
+	<div id="container">
+		<h2>SubHub</h2>
+		<span class="version"><%= VersionUtil.getVersion() %></span>
+	</div>
 </body>
 </html>
