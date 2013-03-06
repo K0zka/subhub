@@ -133,16 +133,15 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 
 	@Override
 	public List<PollSubscription> findPolling(final Date time) {
+		final ArrayList<PollSubscription> result = new ArrayList<>();
 		BasicDBObject query = new BasicDBObject();
 		query.append("h", null);
 		query.append("st", "s");
 		query.append("np", new BasicDBObject("$lt", new Date()));
-		ArrayList<PollSubscription> result = new ArrayList<>();
 		DBCursor cursor = getColl().find(query);
 		while (cursor.hasNext()) {
 			result.add((PollSubscription) dbObjToSubscription(cursor.next()));
 		}
-
 		return result;
 	}
 
