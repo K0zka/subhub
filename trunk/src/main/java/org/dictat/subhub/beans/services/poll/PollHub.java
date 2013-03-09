@@ -7,7 +7,6 @@ import org.dictat.subhub.beans.PollSubscription;
 import org.dictat.subhub.beans.SubscriptionStatus;
 import org.dictat.subhub.beans.services.Hub;
 import org.todomap.feed.beans.NewsFeed;
-import org.todomap.feed.beans.NewsItem;
 import org.todomap.feed.beans.transport.EtagCacheControl;
 import org.todomap.feed.beans.transport.LastModifiedCacheControl;
 import org.todomap.feed.beans.transport.TransportCacheControl;
@@ -17,13 +16,13 @@ import org.todomap.feed.beans.transport.TransportCacheControl;
  */
 public class PollHub implements Hub<PollSubscription> {
 
-	public static final long defaultPollFrequencyMsHardDefault = 1000 * 60 * 60 * 24;
-	private long defaultPollFrequencyMs = defaultPollFrequencyMsHardDefault;
-
-	public long getDefaultPollFrequencyMs() {
-		return defaultPollFrequencyMs;
+	public PollHub(PollScheduler pollScheduler) {
+		super();
+		this.pollScheduler = pollScheduler;
 	}
 
+	final PollScheduler pollScheduler;
+	
 	public static void updateCacheData(PollSubscription poll, NewsFeed feed) {
 		if (feed.getCacheControl() == null) {
 			poll.setLastupdate(null);
@@ -39,28 +38,6 @@ public class PollHub implements Hub<PollSubscription> {
 		}
 	}
 
-	public long getPollFrequency(final NewsFeed feed) {
-		Date first = null;
-		Date last = null;
-		for (final NewsItem item : feed.getNewsItems()) {
-			if (first == null
-					|| (item.getPublished() != null && item.getPublished()
-							.before(first))) {
-				first = item.getPublished();
-			}
-			if (last == null
-					|| (item.getPublished() != null && item.getPublished()
-							.after(last))) {
-				last = item.getPublished();
-			}
-		}
-		if (first != null && last != null) {
-			return (last.getTime() - first.getTime())
-					* feed.getNewsItems().size() / 2;
-		} else {
-			return defaultPollFrequencyMs;
-		}
-	}
 
 	@Override
 	public PollSubscription postSubscribe(final PollSubscription subscription)
@@ -76,15 +53,11 @@ public class PollHub implements Hub<PollSubscription> {
 		return subscription;
 	}
 
-	public void setDefaultPollFrequencyMs(final long defaultPollFrequencyMs) {
-		this.defaultPollFrequencyMs = defaultPollFrequencyMs;
-	}
-
 	@Override
 	public PollSubscription subscribe(final NewsFeed feed, final String feedUrl) {
 		final PollSubscription poll = new PollSubscription();
 		updateCacheData(poll, feed);
-		poll.setInterval(getPollFrequency(feed));
+		poll.setInterval(pollScheduler.getPollFrequency(feed));
 		poll.setStatus(SubscriptionStatus.Subscribed);
 		// poll asap
 		poll.setNextPoll(new Date());
@@ -93,7 +66,7 @@ public class PollHub implements Hub<PollSubscription> {
 
 	@Override
 	public PollSubscription unsubscribe(final PollSubscription subscription) {
-
+		subscription.setStatus(SubscriptionStatus.Unsubscribed);
 		return subscription;
 	}
 
