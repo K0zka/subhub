@@ -44,9 +44,11 @@ public class ResubscribeJob extends AbstractJob {
 					poll.setStatus(SubscriptionStatus.Subscribed);
 					repository.save(poll);
 				} else if (!ObjectUtils.equals(hub, sub.getHub())) {
+					//TODO: this needs testing
 					logger.info("{} changed hub from {} to {}", new Object[] {sub.getUrl(), sub.getHub(), hub});
 					sub.setHub(hub);
 					repository.save(sub);
+					subHub.postSubscribe(sub);
 				} else {
 					subHub.postSubscribe(sub);
 					checkSubscription(sub, SubscriptionStatus.Subscribed);
