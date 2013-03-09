@@ -25,16 +25,13 @@
 	</bean>
 
 	<bean id="executor" class="java.util.concurrent.ThreadPoolExecutor">
-		<constructor-arg value="4"/>
-		<constructor-arg value="64"/>
-		<constructor-arg value="1"/>
-		<constructor-arg value="SECONDS"/>
+		<constructor-arg value="4" />
+		<constructor-arg value="64" />
+		<constructor-arg value="1" />
+		<constructor-arg value="SECONDS" />
 		<constructor-arg>
-			<!-- 
-			<bean class="java.util.concurrent.PriorityBlockingQueue">
-				<constructor-arg value="32"/>
-			</bean>
-			 -->
+			<!-- <bean class="java.util.concurrent.PriorityBlockingQueue"> <constructor-arg 
+				value="32"/> </bean> -->
 			<bean class="java.util.concurrent.LinkedBlockingQueue"></bean>
 		</constructor-arg>
 	</bean>
@@ -46,15 +43,19 @@
 			<bean class="org.dictat.subhub.beans.services.sub.ResubscribeJob">
 				<constructor-arg ref="repo" />
 				<constructor-arg ref="subhub" />
-				<constructor-arg ref="executor"/>
+				<constructor-arg ref="executor" />
 			</bean>
 		</constructor-arg>
 		<constructor-arg>
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
-				<constructor-arg value="1"/>
-				<constructor-arg value="HOURS"/>
+				<constructor-arg value="1" />
+				<constructor-arg value="HOURS" />
 			</bean>
 		</constructor-arg>
+		<property name="enabled" value="false" />
+	</bean>
+
+	<bean id="poll-scheduler" class="org.dictat.subhub.beans.services.poll.PollScheduler">
 	</bean>
 
 	<bean id="jobs.poll" class="org.dictat.subhub.utils.JobWrapper"
@@ -62,43 +63,47 @@
 		<constructor-arg ref="scheduler" />
 		<constructor-arg>
 			<bean class="org.dictat.subhub.beans.services.poll.PollJob">
-				<constructor-arg ref="repo"/>
+				<constructor-arg ref="repo" />
 				<constructor-arg ref="eventQueue" />
-				<constructor-arg ref="executor"/>
+				<constructor-arg ref="executor" />
+				<constructor-arg ref="poll-scheduler" />
 			</bean>
 		</constructor-arg>
 		<constructor-arg>
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
-				<constructor-arg value="1"/>
-				<constructor-arg value="MINUTES"/>
+				<constructor-arg value="1" />
+				<constructor-arg value="MINUTES" />
 			</bean>
 		</constructor-arg>
 	</bean>
 
-	<bean id="jobs.failing" class="org.dictat.subhub.utils.JobWrapper" init-method="init">
-		<constructor-arg ref="scheduler"/>
+	<bean id="jobs.failing" class="org.dictat.subhub.utils.JobWrapper"
+		init-method="init">
+		<constructor-arg ref="scheduler" />
 		<constructor-arg>
 			<bean class="org.dictat.subhub.beans.services.RecheckFailing">
-				<constructor-arg ref="repo"/>
-				<constructor-arg ref="executor"/>
+				<constructor-arg ref="repo" />
+				<constructor-arg ref="executor" />
 			</bean>
 		</constructor-arg>
 		<constructor-arg>
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
-				<constructor-arg value="15"/>
-				<constructor-arg value="MINUTES"/>
+				<constructor-arg value="15" />
+				<constructor-arg value="MINUTES" />
 			</bean>
 		</constructor-arg>
 	</bean>
 
-	<bean id="subhub" class="org.dictat.subhub.beans.services.sub.SubHub"/>
+	<bean id="subhub" class="org.dictat.subhub.beans.services.sub.SubHub" />
 
-	<bean id="pollhub" class="org.dictat.subhub.beans.services.poll.PollHub"/>
+	<bean id="pollhub" class="org.dictat.subhub.beans.services.poll.PollHub">
+		<constructor-arg ref="poll-scheduler" />
+	</bean>
 
 	<bean id="hubhub" class="org.dictat.subhub.beans.services.HubHub">
-		<constructor-arg ref="pollhub"/>
-		<constructor-arg ref="subhub"/>
-		<constructor-arg ref="repo"/>
+		<constructor-arg ref="pollhub" />
+		<constructor-arg ref="subhub" />
+		<constructor-arg ref="repo" />
 	</bean>
 
 	<amq:broker useJmx="false" persistent="true" brokerName="subhub-borker">
