@@ -36,6 +36,7 @@ import org.todomap.feed.beans.transport.TransportCacheControl;
  * Poll the hub-less subscriptions.
  */
 public class PollJob extends AbstractJob {
+	final PollScheduler pollScheduler;
 
 	class PollTask implements Runnable, Prioritized, Comparable<Prioritized> {
 		private final PollSubscription poll;
@@ -53,14 +54,14 @@ public class PollJob extends AbstractJob {
 				if(feed == null) {
 					//this means no change
 					logger.info("{} - no new content", poll.getUrl());
-					updateNextPoll(poll);
+					updateNextPoll(poll, feed);
 					repository.save(poll);
 					return;
 				}
 				if (feed.getNewsItems() != null) {
 					sendToQueue(feed, poll);
 				}
-				updateNextPoll(poll);
+				updateNextPoll(poll, feed);
 				PollHub.updateCacheData(poll, feed);
 				repository.save(poll);
 			} catch (IOException e) {
@@ -127,9 +128,10 @@ public class PollJob extends AbstractJob {
 	}
 
 	public PollJob(SubscriptionRepository repository, EventQueue queue,
-			ExecutorService executor) {
+			ExecutorService executor, PollScheduler pollScheduler) {
 		super(repository, executor);
 		this.queue = queue;
+		this.pollScheduler = pollScheduler;
 	}
 
 	final EventQueue queue;
@@ -163,12 +165,11 @@ public class PollJob extends AbstractJob {
 				logger.warn("task failed", e);
 			}
 		}
-		// TODO Auto-generated method stub
 	}
 
-	static void updateNextPoll(PollSubscription poll) {
+	void updateNextPoll(PollSubscription poll, NewsFeed feed) {
 		if(poll.getInterval() == null) {
-			poll.setInterval(PollHub.defaultPollFrequencyMsHardDefault);
+			poll.setInterval(pollScheduler.getPollFrequency(feed));
 		}
 		if(poll.getNextPoll() == null) {
 			poll.setNextPoll(new Date());
@@ -180,6 +181,5 @@ public class PollJob extends AbstractJob {
 			logger.info("{} - next poll {}", poll.getUrl(),poll.getNextPoll());
 		}
 	}
-	
 
 }
