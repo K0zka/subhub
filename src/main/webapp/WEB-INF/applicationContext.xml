@@ -24,15 +24,16 @@
 		class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler">
 	</bean>
 
-	<bean id="executor" class="java.util.concurrent.ThreadPoolExecutor">
+	<bean id="executor" class="org.dictat.subhub.utils.PriorityThreadPoolExecutor">
 		<constructor-arg value="4" />
 		<constructor-arg value="64" />
 		<constructor-arg value="1" />
 		<constructor-arg value="SECONDS" />
 		<constructor-arg>
-			<!-- <bean class="java.util.concurrent.PriorityBlockingQueue"> <constructor-arg 
-				value="32"/> </bean> -->
-			<bean class="java.util.concurrent.LinkedBlockingQueue"></bean>
+			<bean class="java.util.concurrent.PriorityBlockingQueue">
+				<constructor-arg value="32" />
+			</bean>
+			<!-- <bean class="java.util.concurrent.LinkedBlockingQueue"/> -->
 		</constructor-arg>
 	</bean>
 
