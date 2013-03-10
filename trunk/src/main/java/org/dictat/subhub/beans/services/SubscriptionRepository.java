@@ -15,4 +15,5 @@ public interface SubscriptionRepository {
 	void save(Subscription subscription);
 	List<PushSubscription> findExpring(Date time);
 	List<PollSubscription> findPolling(Date time);
+	List<Subscription> findFailing();
 }

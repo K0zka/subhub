@@ -195,4 +195,15 @@ public class MongoSubscriptionRepository implements SubscriptionRepository {
 		this.dbname = dbname;
 	}
 
+	@Override
+	public List<Subscription> findFailing() {
+		final ArrayList<Subscription> result = new ArrayList<>();
+		final BasicDBObject query = new BasicDBObject("st", "f");
+		final DBCursor cursor = getColl().find(query);
+		while(cursor.hasNext()) {
+			result.add(dbObjToSubscription(cursor.next()));
+		}
+		return result;
+	}
+
 }
