@@ -137,7 +137,7 @@ public class PollJob extends AbstractJob {
 	final EventQueue queue;
 	private final static Logger logger = LoggerFactory.getLogger(PollJob.class);
 
-	static List<TransportCacheControl> getCacheControls(PollSubscription poll) {
+	public static List<TransportCacheControl> getCacheControls(PollSubscription poll) {
 		ArrayList<TransportCacheControl> ret = new ArrayList<>(2);
 		if (poll.getEtag() != null) {
 			ret.add(new EtagCacheControl(poll.getEtag()));
