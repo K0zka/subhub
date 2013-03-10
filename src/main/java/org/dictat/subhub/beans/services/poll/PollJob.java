@@ -123,7 +123,7 @@ public class PollJob extends AbstractJob {
 
 		@Override
 		public double getPriority() {
-			return 1;
+			return 2;
 		}
 	}
 
