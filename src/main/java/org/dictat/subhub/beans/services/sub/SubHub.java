@@ -89,10 +89,13 @@ public class SubHub implements Hub<PushSubscription> {
 				response.getStatusLine().getStatusCode(),
 				response.getEntity() == null ? "" : IOUtils.toString(response
 						.getEntity().getContent())});
-		if(response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+		if (response.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT
+				|| response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 			sub.setStatus(SubscriptionStatus.Subscribed);
+			sub.setLastResubscribe(new Date());
 		} else {
 			sub.setStatus(SubscriptionStatus.Failing);
+			sub.setStatusChange(new Date());
 		}
 		return sub;
 	}
