@@ -52,7 +52,6 @@
 				<constructor-arg value="HOURS" />
 			</bean>
 		</constructor-arg>
-		<property name="enabled" value="false" />
 	</bean>
 
 	<bean id="poll-scheduler" class="org.dictat.subhub.beans.services.poll.PollScheduler">

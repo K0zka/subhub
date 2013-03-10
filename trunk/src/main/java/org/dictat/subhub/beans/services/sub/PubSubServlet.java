@@ -1,7 +1,6 @@
 package org.dictat.subhub.beans.services.sub;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -56,12 +55,8 @@ public class PubSubServlet extends HttpServlet {
 		if (subscription == null) {
 			return false;
 		}
-		boolean ret = verification != null
+		return verification != null
 				&& verification.equals(subscription.getVerifyToken());
-		if (ret) {
-			subscription.setLastResubscribe(new Date());
-		}
-		return ret;
 	}
 
 	@Override
