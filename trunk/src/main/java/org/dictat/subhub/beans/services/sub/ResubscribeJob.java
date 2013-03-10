@@ -22,9 +22,16 @@ import org.todomap.feed.HttpClientReader;
 import org.todomap.feed.beans.NewsFeed;
 import org.todomap.feed.utils.NewsFeedUtils;
 
+/**
+ * This job is refreshing subscriptions for subhub protocol. Theoretically it is
+ * not needed, practically it is sometimes needed (workaround).
+ * 
+ * @author kocka
+ */
 public class ResubscribeJob extends AbstractJob {
 
-	class ResubscribeTask implements Runnable, Prioritized, Comparable<Prioritized> {
+	class ResubscribeTask implements Runnable, Prioritized,
+			Comparable<Prioritized> {
 		private final PushSubscription sub;
 
 		ResubscribeTask(PushSubscription sub) {
@@ -37,15 +44,17 @@ public class ResubscribeJob extends AbstractJob {
 			try {
 				NewsFeed feed = HttpClientReader.read(sub.getUrl());
 				String hub = NewsFeedUtils.getPubSubHub(feed);
-				if(StringUtils.isEmpty(hub)) {
-					logger.info("{} is no longer pushing to a hub", sub.getUrl());
+				if (StringUtils.isEmpty(hub)) {
+					logger.info("{} is no longer pushing to a hub",
+							sub.getUrl());
 					PollSubscription poll = new PollSubscription(sub);
 					poll.setNextPoll(new Date());
 					poll.setStatus(SubscriptionStatus.Subscribed);
 					repository.save(poll);
 				} else if (!ObjectUtils.equals(hub, sub.getHub())) {
-					//TODO: this needs testing
-					logger.info("{} changed hub from {} to {}", new Object[] {sub.getUrl(), sub.getHub(), hub});
+					// TODO: this needs testing
+					logger.info("{} changed hub from {} to {}", new Object[] {
+							sub.getUrl(), sub.getHub(), hub });
 					sub.setHub(hub);
 					repository.save(sub);
 					subHub.postSubscribe(sub);
@@ -61,12 +70,12 @@ public class ResubscribeJob extends AbstractJob {
 
 		@Override
 		public int compareTo(Prioritized o) {
-			return (int)(getPriority() - o.getPriority());
+			return (int) (getPriority() - o.getPriority());
 		}
 
 		@Override
 		public double getPriority() {
-			return 0;
+			return -1;
 		}
 	}
 
