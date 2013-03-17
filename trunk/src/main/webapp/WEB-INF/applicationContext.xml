@@ -11,7 +11,7 @@
 	</bean>
 
 	<bean id="mongoIp" class="org.dictat.subhub.utils.StringFactory">
-		<property name="value" value="192.168.122.247" />
+		<property name="value" value="192.168.122.246" />
 	</bean>
 
 	<bean id="mongo" class="com.mongodb.Mongo">
@@ -24,16 +24,18 @@
 		class="org.springframework.scheduling.concurrent.ConcurrentTaskScheduler">
 	</bean>
 
-	<bean id="executor" class="org.dictat.subhub.utils.PriorityThreadPoolExecutor">
+	<bean id="executor" class="java.util.concurrent.ThreadPoolExecutor">
 		<constructor-arg value="4" />
 		<constructor-arg value="64" />
 		<constructor-arg value="1" />
 		<constructor-arg value="SECONDS" />
 		<constructor-arg>
+			<!-- 
 			<bean class="java.util.concurrent.PriorityBlockingQueue">
 				<constructor-arg value="32" />
 			</bean>
-			<!-- <bean class="java.util.concurrent.LinkedBlockingQueue"/> -->
+			 -->
+			<bean class="java.util.concurrent.LinkedBlockingQueue"/>
 		</constructor-arg>
 	</bean>
 
@@ -53,6 +55,7 @@
 				<constructor-arg value="HOURS" />
 			</bean>
 		</constructor-arg>
+		<property name="enabled" value="false"/>
 	</bean>
 
 	<bean id="poll-scheduler" class="org.dictat.subhub.beans.services.poll.PollScheduler">
@@ -100,6 +103,8 @@
 		<constructor-arg ref="poll-scheduler" />
 	</bean>
 
+	<bean id="feedPolice" class="org.dictat.subhub.beans.services.feedpolice.DefaultFeedPolice"/>
+
 	<bean id="hubhub" class="org.dictat.subhub.beans.services.HubHub">
 		<constructor-arg ref="pollhub" />
 		<constructor-arg ref="subhub" />
@@ -107,6 +112,19 @@
 	</bean>
 
 	<amq:broker useJmx="false" persistent="true" brokerName="subhub-borker">
+		<!--
+		<amq:persistenceAdapter>
+			<amq:kahaDB>
+				<amq:usageManager>
+					<amq:systemUsage>
+						<amq:storeUsage>
+							<amq:storeUsage limit="1G"/>
+						</amq:storeUsage>
+					</amq:systemUsage>
+				</amq:usageManager>
+			</amq:kahaDB>
+		</amq:persistenceAdapter>
+		-->
 		<amq:transportConnectors>
 			<amq:transportConnector uri="vm://subhub-borker" />
 			<amq:transportConnector uri="tcp://localhost:61616" />
@@ -125,9 +143,12 @@
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
 	</bean>
 
+	<!-- 
 	<bean id="eventQueue" class="org.dictat.subhub.beans.services.jms.JmsEventQueue">
 		<constructor-arg ref="jmsTemplate" />
 	</bean>
+	-->
+	<bean id="eventQueue" class="org.dictat.subhub.beans.services.dummy.DummyEventQueue"/>
 
 	<bean
 		class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
