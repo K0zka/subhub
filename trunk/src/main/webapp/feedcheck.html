@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>feed check</title>
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#checkbutton").click(function() {
+		$("#results").hide();
+		$.getJSON('check', {url : $('#url').val()}, function(data) {
+			var handle = function(val) {
+				if(data[val]) {
+					$("#"+val+" .pass").show();
+					$("#"+val+" .fail").hide();
+				} else {
+					$("#"+val+" .pass").hide();
+					$("#"+val+" .fail").show();
+				}
+			}
+			handle("pubsubhubbub");
+			handle("caching");
+			handle("respectCache");
+			handle("compressing");
+			handle("correctTimestamp");
+			handle("correctUuid");
+			$("#results").fadeIn();
+		})
+	});
+	$("#results").hide();
+});
+
+</script>
+
+<style type="text/css">
+
+body {
+	font-size: 12px;
+	
+}
+
+#results div span img {
+	height: 20px;
+}
+
+#results div span {
+	font-size: 20px;
+}
+
+.pass {
+	background-color: #FAFFFA;
+}
+
+.fail {
+	background-color: #FFFAFA;
+}
+
+</style>
+
+</head>
+<body>
+	<div>
+	<input type="text" id="url">
+	<button type="button" id="checkbutton">check</button>
+	<ul id="results">
+		<li id="pubsubhubbub">
+			<span class="pass">uses <a href="https://code.google.com/p/pubsubhubbub/" target="__new">pubsubhubbub</a> to push updates near realtime</span>
+			<span class="fail">does not have a <a href="https://code.google.com/p/pubsubhubbub/" target="__new">pubsubhub hub</a>, it's updates can be retrieved only by polling</span>
+		</li>
+		<li id="caching">
+			<span class="pass">sends http caching headers</span>
+			<span class="fail">does not send caching headers</span>
+		</li>
+		<li id="respectCache">
+			<span class="pass">correctly uses cache</span>
+			<span class="fail">does not respect cache headers</span>
+		</li>
+		<li id="compressing">
+			<span class="pass">saves bandwidth with compression</span>
+			<span class="fail">does not use compression</span>
+		</li>
+		<li id="correctTimestamp">
+			<span class="pass">has correct timestamps.</span>
+			<span class="fail">timestamps are not correct</span>
+		</li>
+		<li id="correctUuid">
+			<span class="pass">id's are correct</span>
+			<span class="fail">ID's are either missing or broken</span>
+		</li>
+	</ul>
+	</div>
+</body>
+</html>
