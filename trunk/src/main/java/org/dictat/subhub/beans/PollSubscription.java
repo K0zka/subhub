@@ -67,4 +67,8 @@ public class PollSubscription extends Subscription {
 	public void setLastGuid(String lastGuid) {
 		this.lastGuid = lastGuid;
 	}
+	
+	public boolean isHttpCache() {
+		return (etag != null || lastupdate != null);
+	}
 }
