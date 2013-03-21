@@ -24,6 +24,7 @@ $(document).ready(function() {
 			handle("compressing");
 			handle("correctTimestamp");
 			handle("correctUuid");
+			$('title').text('feed check: '+$('#url').val());
 			$("#results").fadeIn();
 		})
 	});
@@ -48,20 +49,38 @@ body {
 }
 
 .pass {
-	background-color: #FAFFFA;
+	background-color: #F0FFF0;
 }
 
 .fail {
-	background-color: #FFFAFA;
+	background-color: #FFF0F0;
+}
+
+#url {
+	width: 300px;
+}
+
+#container {
+	margin-left: auto;
+	margin-right: auto;
+	width: 700px;
+}
+
+#search {
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
 }
 
 </style>
 
 </head>
 <body>
-	<div>
-	<input type="text" id="url">
-	<button type="button" id="checkbutton">check</button>
+	<div id="container">
+	<div id="search">
+		<input type="text" id="url">
+		<button type="button" id="checkbutton">check</button>
+	</div>
 	<ul id="results">
 		<li id="pubsubhubbub">
 			<span class="pass">uses <a href="https://code.google.com/p/pubsubhubbub/" target="__new">pubsubhubbub</a> to push updates near realtime</span>
