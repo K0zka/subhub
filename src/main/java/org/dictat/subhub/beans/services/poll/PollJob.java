@@ -51,17 +51,18 @@ public class PollJob extends AbstractJob {
 				logger.info("{} - fetching...", poll.getUrl());
 				NewsFeed feed = HttpClientReader.read(poll.getUrl(),
 						getCacheControls(poll));
-				if(feed == null) {
-					//this means no change
+				if (feed == null) {
+					// this means no change
 					logger.info("{} - no new content", poll.getUrl());
-					updateNextPoll(poll, feed);
+					updateNextPoll(poll, feed, false);
 					repository.save(poll);
 					return;
 				}
+				boolean sentAny = false;
 				if (feed.getNewsItems() != null) {
-					sendToQueue(feed, poll);
+					sentAny = sendToQueue(feed, poll);
 				}
-				updateNextPoll(poll, feed);
+				updateNextPoll(poll, feed, !sentAny);
 				PollHub.updateCacheData(poll, feed);
 				repository.save(poll);
 			} catch (IOException e) {
@@ -72,34 +73,53 @@ public class PollJob extends AbstractJob {
 			}
 		}
 
-		private void sendToQueue(NewsFeed feed, PollSubscription poll) {
+		private boolean sendToQueue(NewsFeed feed, PollSubscription poll) {
 			boolean first = true;
+			boolean sentAny = false;
 			logger.info("{} - checking new items", poll.getUrl());
 			String lastGuid = null;
 			for (NewsItem item : feed.getNewsItems()) {
 				if (first) {
-					lastGuid = item.getGuid();
+					lastGuid = getGuid(item);
 					first = false;
 				}
-				if (ObjectUtils.equals(item.getGuid(),
-						poll.getLastGuid())) {
+				if (poll.getLastGuid() != null
+						&& ObjectUtils
+								.equals(getGuid(item), poll.getLastGuid())) {
 					break;
 				}
-				//send item to queue
-				sendToQueue(feed,item);
+				// send item to queue
+				sendToQueue(feed, item);
+				sentAny = true;
 			}
-			//TODO send the new items to the queue
-			
+			if (!sentAny && poll.isHttpCache()) {
+				logger.warn("{} - may be a cheater, ignored cache",
+						poll.getUrl());
+			}
+
 			poll.setLastGuid(lastGuid);
+			return sentAny;
+		}
+
+		private String getGuid(NewsItem item) {
+			if (item.getGuid() != null) {
+				return item.getGuid();
+			} else if (item.getUrl() != null) {
+				return item.getUrl();
+			} else if (item.getPublished() != null) {
+				return item.getPublished().toString();
+			} else
+				return null;
 		}
 
 		private void sendToQueue(NewsFeed feed, NewsItem item) {
 			try {
-				logger.info("sending to queue: {}", item.getGuid());
+				logger.info("sending to queue: {}", getGuid(item));
 				NewsFeed cloneFeed = (NewsFeed) BeanUtils.cloneBean(feed);
-				//replace with a single item
-				BeanUtils.setProperty(cloneFeed, "newsItems", Collections.singletonList(item));
-				//serialize
+				// replace with a single item
+				BeanUtils.setProperty(cloneFeed, "newsItems",
+						Collections.singletonList(item));
+				// serialize
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				Writer.write(cloneFeed, out);
 				queue.onPublish(new ByteArrayInputStream(out.toByteArray()));
@@ -137,7 +157,8 @@ public class PollJob extends AbstractJob {
 	final EventQueue queue;
 	private final static Logger logger = LoggerFactory.getLogger(PollJob.class);
 
-	public static List<TransportCacheControl> getCacheControls(PollSubscription poll) {
+	public static List<TransportCacheControl> getCacheControls(
+			PollSubscription poll) {
 		ArrayList<TransportCacheControl> ret = new ArrayList<>(2);
 		if (poll.getEtag() != null) {
 			ret.add(new EtagCacheControl(poll.getEtag()));
@@ -156,7 +177,7 @@ public class PollJob extends AbstractJob {
 		for (final PollSubscription poll : polls) {
 			futures.add(executor.submit(new PollTask(poll)));
 		}
-		for(Future<?> future : futures) {
+		for (Future<?> future : futures) {
 			try {
 				future.get();
 			} catch (InterruptedException e) {
@@ -167,18 +188,24 @@ public class PollJob extends AbstractJob {
 		}
 	}
 
-	void updateNextPoll(PollSubscription poll, NewsFeed feed) {
-		if(poll.getInterval() == null) {
+	void updateNextPoll(PollSubscription poll, NewsFeed feed, boolean cheater) {
+		if (cheater) {
+			poll.setInterval(Math.max(pollScheduler.getPollFrequency(feed) * 100, 300000));
+			logger.warn("{} - is misbehaving poll frequency updated to {}",
+					poll.getUrl(), poll.getInterval());
+		} else if (poll.getInterval() == null) {
 			poll.setInterval(pollScheduler.getPollFrequency(feed));
 		}
-		if(poll.getNextPoll() == null) {
+		if (poll.getNextPoll() == null) {
 			poll.setNextPoll(new Date());
 		} else {
 			Calendar calendar = new GregorianCalendar();
-			calendar.setTime(new Date()); //TODO: not calculate it from the date, but from now, maybe this is not perfect
+			calendar.setTime(new Date()); // TODO: not calculate it from the
+											// date, but from now, maybe this is
+											// not perfect
 			calendar.add(Calendar.MILLISECOND, poll.getInterval().intValue());
 			poll.setNextPoll(calendar.getTime());
-			logger.info("{} - next poll {}", poll.getUrl(),poll.getNextPoll());
+			logger.info("{} - next poll {}", poll.getUrl(), poll.getNextPoll());
 		}
 	}
 
