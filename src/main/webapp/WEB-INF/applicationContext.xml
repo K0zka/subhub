@@ -53,6 +53,7 @@
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
 				<constructor-arg value="1" />
 				<constructor-arg value="HOURS" />
+				<property name="initialDelay" value="1"/>
 			</bean>
 		</constructor-arg>
 		<property name="enabled" value="false"/>
@@ -76,6 +77,7 @@
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
 				<constructor-arg value="1" />
 				<constructor-arg value="MINUTES" />
+				<property name="initialDelay" value="1"/>
 			</bean>
 		</constructor-arg>
 	</bean>
@@ -93,6 +95,7 @@
 			<bean class="org.springframework.scheduling.support.PeriodicTrigger">
 				<constructor-arg value="15" />
 				<constructor-arg value="MINUTES" />
+				<property name="initialDelay" value="1"/>
 			</bean>
 		</constructor-arg>
 	</bean>
@@ -111,20 +114,7 @@
 		<constructor-arg ref="repo" />
 	</bean>
 
-	<amq:broker useJmx="false" persistent="true" brokerName="subhub-borker">
-		<!--
-		<amq:persistenceAdapter>
-			<amq:kahaDB>
-				<amq:usageManager>
-					<amq:systemUsage>
-						<amq:storeUsage>
-							<amq:storeUsage limit="1G"/>
-						</amq:storeUsage>
-					</amq:systemUsage>
-				</amq:usageManager>
-			</amq:kahaDB>
-		</amq:persistenceAdapter>
-		-->
+	<amq:broker useJmx="false" persistent="true" brokerName="subhub-borker" >
 		<amq:transportConnectors>
 			<amq:transportConnector uri="vm://subhub-borker" />
 			<amq:transportConnector uri="tcp://localhost:61616" />
@@ -138,17 +128,27 @@
 	<amq:queue id="commandQueue" name="commandqueue"
 		physicalName="commandqueue" />
 
-	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate" lazy-init="true">
 		<property name="defaultDestination" ref="jmsQueue" />
 		<property name="connectionFactory" ref="jmsConnectionFactory" />
 	</bean>
 
-	<!-- 
-	<bean id="eventQueue" class="org.dictat.subhub.beans.services.jms.JmsEventQueue">
+	<bean id="eventQueue.jms" class="org.dictat.subhub.beans.services.jms.JmsEventQueue" lazy-init="true">
 		<constructor-arg ref="jmsTemplate" />
 	</bean>
-	-->
-	<bean id="eventQueue" class="org.dictat.subhub.beans.services.dummy.DummyEventQueue"/>
+	<bean id="eventQueue.dummy" class="org.dictat.subhub.beans.services.dummy.DummyEventQueue"/>
+	
+	<bean id="eventQueue" class="org.dictat.springext.factory.SimpleImplementationSwitchFactory">
+		<constructor-arg>
+			<map>
+				<!-- default -->
+				<entry key="default" value-ref="eventQueue.jms"/>
+				<entry key="jms" value-ref="eventQueue.jms"/>
+				<entry key="dummy" value-ref="eventQueue.dummy"/>
+			</map>
+		</constructor-arg>
+		<constructor-arg value="org.dictat.subhub.beans.services.EventQueue"/>
+	</bean>
 
 	<bean
 		class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">
