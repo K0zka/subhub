@@ -162,7 +162,7 @@
 		<dependency>
 			<groupId>org.dictat</groupId>
 			<artifactId>springutils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>0.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
