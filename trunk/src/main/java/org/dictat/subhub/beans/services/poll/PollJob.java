@@ -116,8 +116,10 @@ public class PollJob extends AbstractJob {
 			try {
 				logger.info("sending to queue: {}", getGuid(item));
 				NewsFeed cloneFeed = (NewsFeed) BeanUtils.cloneBean(feed);
-				// replace with a single item
-				BeanUtils.setProperty(cloneFeed, "newsItems",
+				// replace with a single item (this needs some care)
+				BeanUtils.setProperty(cloneFeed, "items",
+						Collections.singletonList(item));
+				BeanUtils.setProperty(cloneFeed, "entries",
 						Collections.singletonList(item));
 				// serialize
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
