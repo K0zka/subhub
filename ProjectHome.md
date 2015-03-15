@@ -1,0 +1,1 @@
+Subhub collects your RSS/Atom feeds and sends them to a JMS queue. All your client has to do is to process JMS messages.
